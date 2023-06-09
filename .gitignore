@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 
 .vscode
+
+# Remove all mentions of this file
+*vinbigdata-chest-xray-abnormalities-detection*

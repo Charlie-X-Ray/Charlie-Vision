@@ -44,5 +44,5 @@ Conda is an environment manager that lets us share the correct environment setti
 To use it run the following:
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment-opencv.yml
 ```
