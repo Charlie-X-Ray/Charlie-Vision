@@ -50,3 +50,20 @@ To use it run the following:
 ```bash
 conda env create -f environment-opencv.yml
 ```
+
+To activate your environment run:
+
+```bash
+conda activate cxr-opencv
+```
+
+You should see a prefix `(cxr-opencv)` added to your prompt.
+
+To test that the environment was created correctly run in the `Charlie-Vision` directory:
+
+```bash
+python test.py
+```
+
+If some of the imports fail, it means not all the pacakges were installed correctly.
+Try deleting the created envrionment and repeating the creating conda environment steps.
