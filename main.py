@@ -7,11 +7,12 @@ from pydicom.pixel_data_handlers.util import apply_voi_lut
 import pandas as pd
 import numpy as np
 import cv2
+import math
 
-DESTINATION_FOLDER = 'outputs'
-DATASET_FOLDER = r'..\datasets\vinbigdata-chest-xray-abnormalities-detection'
+DESTINATION_FOLDER = 'datasets'
+DATASET_FOLDER = join('datasets', 'vindr-cxr-original')
 ANNOTATED_FOLDER = join(DESTINATION_FOLDER, 'annotated')
-PNG_FOLDER = join(DESTINATION_FOLDER, 'converted')
+PNG_FOLDER = join(DESTINATION_FOLDER, 'converted') # wear to save converted photos
 TRAIN_FILE = join(DATASET_FOLDER, 'train.csv')
 TRAIN_FOLDER = join(DATASET_FOLDER, 'train')
 
@@ -19,6 +20,8 @@ TRAIN_FOLDER = join(DATASET_FOLDER, 'train')
 def read_xray(path, voi_lut=True, fix_monochrome=True):
     # Original from: https://www.kaggle.com/raddar/convert-dicom-to-np-array-the-correct-way
     dicom = pydicom.read_file(path)
+    dicom.BitsStored = 16
+    # print(dicom.BitsStored)
 
     # VOI LUT (if available by DICOM device) is used to transform raw DICOM data to
     # "human-friendly" view
@@ -37,7 +40,7 @@ def read_xray(path, voi_lut=True, fix_monochrome=True):
 
     return data
 
-def resize(im, size, keep_ratio=False, resample=Image.LANCZOS):
+def resize(im, size, keep_ratio=False, resample=Image.Resampling.LANCZOS):
     # Original from: https://www.kaggle.com/xhlulu/vinbigdata-process-and-resize-to-image
     im = Image.fromarray(im)
 
@@ -61,10 +64,44 @@ def draw_boxes(img, box_coords):
         'rad_id': '',
     }
 
+    added_coords = [] 
+
+    def close(new_coord, old_coord):
+
+        if new_coord['class_id'] != old_coord['class_id']:
+            return False
+
+        old_x0, old_y0, old_x1, old_y1 = old_coord['x0'], old_coord['y0'], old_coord['x1'], old_coord['y1']
+        new_x0, new_y0, new_x1, new_y1 = new_coord['x0'], new_coord['y0'], new_coord['x1'], new_coord['y1']
+
+        measure_dist = lambda x0, y0, x1, y1: math.sqrt(abs(x0 - x1)**2) + math.sqrt(abs(y0 - y1)**2)
+
+        too_close = 300
+
+        # assuming x0,y0 is really top left
+        coord0_close = min(measure_dist(old_x0, old_y0, new_x0, new_y0), measure_dist(old_x0, old_y0, new_x1, new_y1)) < too_close
+        coord1_close = min(measure_dist(old_x1, old_y1, new_x1, new_y1), measure_dist(old_x1, old_y1, new_x1, new_y1)) < too_close
+
+        return coord0_close and coord1_close
+
     for coord in box_coords:
         '''Draw box'''
-        x0, y0, x1, y1 = coord['x0'], coord['y0'], coord['x1'], coord['y1']
-        img = cv2.rectangle(img, (y0, x0), (y1, x1), (0, 255, 100), 3)
+
+        to_add = True
+
+        for old_coord in added_coords:
+            # print(f'New:{coord}')
+            # print(f'Old:{old_coord}')
+            # print(close(coord, old_coord))
+            if close(coord, old_coord):
+                to_add = False
+                break
+        
+        if to_add:
+            x0, y0, x1, y1 = coord['x0'], coord['y0'], coord['x1'], coord['y1']
+            img = cv2.rectangle(img, (x0, y0), (x1, y1), (0, 255, 100), 3) # not sure which should be x which should be y
+            img = cv2.putText(img, coord['class_name'], (x0, y0), 0, 2, (0, 0, 255), 3)
+            added_coords.append(coord)
 
     return img
 
@@ -102,15 +139,23 @@ def main():
 
     dicom_datas = retrieve_dicom_data(number_of_images, TRAIN_FILE)
     for dicom_datum in dicom_datas:
-        dicom_path = join(TRAIN_FOLDER, dicom_datum['image_id'] + '.dicom')
-        img = read_xray(dicom_path)
-        # img = resize(img, 512)
-        cv2.imwrite(join(PNG_FOLDER, dicom_datum['image_id'] + '.png'), img)
-        img = cv2.imread(join(PNG_FOLDER, dicom_datum['image_id'] + '.png'))
-        img = draw_boxes(img, dicom_datum['coords'])
-        cv2.imshow(dicom_path, cv2.resize(img, (512, 512)))
-        cv2.waitKey(0)
-        cv2.destroyWindow(dicom_path)
+
+        image_id = dicom_datum['image_id']
+        
+        # Opens the dicom file and reads the saved file
+        dicom_path = join(TRAIN_FOLDER, image_id + '.dicom')
+        img_og = read_xray(dicom_path)
+
+        # Saves the xray as a png
+        cv2.imwrite(join(PNG_FOLDER, image_id + '.png'), img_og)
+
+        # Reads the saved png files
+        img_saved = cv2.imread(join(PNG_FOLDER, image_id + '.png'))
+        print(f'Drawing boxes for {image_id}')
+        img = draw_boxes(img_saved, dicom_datum['coords'])
+
+        # Saves the images with boxes
+        cv2.imwrite(join(ANNOTATED_FOLDER, image_id + '_box.png'), img)
 
 
 

@@ -163,3 +163,5 @@ cython_debug/
 
 # Remove all mentions of this file
 *vinbigdata-chest-xray-abnormalities-detection*
+datasets/vindr-cxr-original/test
+datasets/vindr-cxr-original/train

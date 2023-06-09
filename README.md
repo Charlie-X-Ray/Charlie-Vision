@@ -48,16 +48,16 @@ Conda is an environment manager that lets us share the correct environment setti
 To use it run the following:
 
 ```bash
-conda env create -f environment-opencv.yml
+conda env create -f environment-pip.yml
 ```
 
 To activate your environment run:
 
 ```bash
-conda activate cxr-opencv
+conda activate cxr-pip
 ```
 
-You should see a prefix `(cxr-opencv)` added to your prompt.
+You should see a prefix `(cxr-pip)` added to your prompt.
 
 To test that the environment was created correctly run in the `Charlie-Vision` directory:
 
