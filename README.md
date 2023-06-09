@@ -8,6 +8,10 @@ The AI behind Charlie X
 To start working on this repository, you will need to have miniconda/ anaconda installed,
 I recommend installing miniconda.
 
+The list of installers can be foudn on the [miniconda docs](https://docs.conda.io/en/latest/miniconda.html).
+
+The installation guide was written with reference to their [macos install instructions](https://conda.io/projects/conda/en/stable/user-guide/install/macos.html)
+
 ### M1
 
 If you are using a Mac running on M1, you should be able to use the following instructions.
