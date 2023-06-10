@@ -80,10 +80,7 @@ Next we pip install a bunch of packages
 
 ```bash
 pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 #this also gives access to PIL
-pip install pydicom
-pip install pandas
-pip install matplotlib
-pip install opencv-python
+pip install pydicom pandas matplotlib opencv-python
 ```
 This should be everything you need.
 
@@ -115,3 +112,9 @@ python test.py
 
 If some of the imports fail, it means not all the pacakges were installed correctly.
 Try deleting the created envrionment and repeating the creating conda environment steps.
+
+If this all works, run `main.py` to draw boxes using the following:
+
+```bash
+python main.py
+```
