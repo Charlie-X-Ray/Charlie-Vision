@@ -102,7 +102,7 @@ conda activate cxr-pip
 
 You should see a prefix `(cxr-pip)` added to your prompt.
 
-### Test Cionda Envrionment
+### Test Conda Envrionment
 
 To test that the environment was created correctly run in the `Charlie-Vision` directory:
 
