@@ -42,6 +42,7 @@ def read_xray(path, voi_lut=True, fix_monochrome=True):
 
 def resize(im, size, keep_ratio=False, resample=Image.Resampling.LANCZOS):
     # Original from: https://www.kaggle.com/xhlulu/vinbigdata-process-and-resize-to-image
+    
     im = Image.fromarray(im)
 
     if keep_ratio:
@@ -49,7 +50,7 @@ def resize(im, size, keep_ratio=False, resample=Image.Resampling.LANCZOS):
     else:
         im = im.resize((size, size), resample)
 
-    return im
+    return np.asarray(im)
 
 def draw_boxes(img, box_coords):
     '''Draws boxes around pngs and returns it'''
@@ -135,7 +136,7 @@ def retrieve_dicom_data(num: int, train_file: str):
 def main():
     assert os.path.exists(DATASET_FOLDER)
 
-    number_of_images = 20
+    number_of_images = 8
 
     dicom_datas = retrieve_dicom_data(number_of_images, TRAIN_FILE)
     for dicom_datum in dicom_datas:
@@ -153,6 +154,7 @@ def main():
         img_saved = cv2.imread(join(PNG_FOLDER, image_id + '.png'))
         print(f'Drawing boxes for {image_id}')
         img = draw_boxes(img_saved, dicom_datum['coords'])
+        img = resize(img, 512)
 
         # Saves the images with boxes
         cv2.imwrite(join(ANNOTATED_FOLDER, image_id + '_box.png'), img)

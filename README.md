@@ -31,6 +31,27 @@ To verify your install, check that you have conda version 22 or later by running
 conda --version
 ```
 
+### NUS HPC
+
+Miniconda is stored as a module on NUS HPC. The instructions for accessing it was taken from their [Python guide](https://drive.google.com/drive/u/0/folders/1za8jGiPqaNLR3ys74CXMPDXKwIUKgUEB).
+Simply run the following commands to setup
+
+```bash
+echo ". /app1/bioinfo/miniconda/4.9/etc/profile.d/conda.sh" >> ~/.bashrc
+mkdir ~/conda_envs
+echo "export CONDA_ENVS_PATH=~/conda_envs/" >> ~/.bashrc
+```
+
+Now to enable conda run the following:
+
+```bash
+. ~/.bashrc # This is only needed if you just edited your .bashrc file. A .bashrc file is run automatically everytime you login, so if you restarted terminal again this is unnecessary.
+module load miniconda
+conda activate base
+```
+
+You should see the `(base)` prefix added to your prompt.
+
 ## Development
 
 ### GitHub
@@ -44,8 +65,30 @@ cd Charlie-Vision
 
 ### Creating Conda Environment
 
-Conda is an environment manager that lets us share the correct environment settings between everyone.
-To use it run the following:
+Conda is an environment and package manager that supposedly helps install packages and check their dependencies.
+
+First start by creating an environment that uses `python3.11`. This will also give us access to `pip`:
+
+```bash
+conda create env -n cxr-pip python=3.11 -y
+conda activate cxr-pip
+```
+
+You should see a `(cxr-pip)` suffix added to your prompt
+
+Next we pip install a bunch of packages
+
+```bash
+pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 #this also gives access to PIL
+pip install pydicom pandas matplotlib opencv-python
+```
+This should be everything you need.
+
+### Creating Conda Env From File (WIP)
+
+**This is bug prone, so I recommend following the steps above**
+
+Run the following to load from a `.yml` file:
 
 ```bash
 conda env create -f environment-pip.yml
@@ -59,6 +102,8 @@ conda activate cxr-pip
 
 You should see a prefix `(cxr-pip)` added to your prompt.
 
+### Test Conda Envrionment
+
 To test that the environment was created correctly run in the `Charlie-Vision` directory:
 
 ```bash
@@ -67,3 +112,9 @@ python test.py
 
 If some of the imports fail, it means not all the pacakges were installed correctly.
 Try deleting the created envrionment and repeating the creating conda environment steps.
+
+If this all works, run `main.py` to draw boxes using the following:
+
+```bash
+python main.py
+```
