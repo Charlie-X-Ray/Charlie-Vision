@@ -2,7 +2,6 @@
 
 The AI behind Charlie X
 
-
 ## Setup
 
 To start working on this repository, you will need to have miniconda/ anaconda installed,
