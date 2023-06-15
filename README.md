@@ -81,11 +81,12 @@ Next we pip install a bunch of packages
 pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 #this also gives access to PIL
 pip install pydicom pandas matplotlib opencv-python
 ```
+
 This should be everything you need.
 
 ### Creating Conda Env From File (WIP)
 
-**This is bug prone, so I recommend following the steps above**
+Note that **This is bug prone, so I recommend following the steps above**
 
 Run the following to load from a `.yml` file:
 
