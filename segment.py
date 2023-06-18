@@ -14,9 +14,10 @@ import torchxrayvision as xrv
 model = xrv.baseline_models.chestx_det.PSPNet()
 print(model)
 
-original = skimage.io.imread(r"datasets/converted/1c32170b4af4ce1a3030eb8167753b06.png")
+original = cv2.imread(r"datasets/converted/1c32170b4af4ce1a3030eb8167753b06.png")
 img = xrv.datasets.normalize(original, 255) # convert 8-bit image to [-1024, 1024] range
-img = img.mean(2)
+img = img.mean(2)[None, ...]
+print(img.shape)
 
 transform = torchvision.transforms.Compose([xrv.datasets.XRayCenterCrop(),xrv.datasets.XRayResizer(512)])
 
