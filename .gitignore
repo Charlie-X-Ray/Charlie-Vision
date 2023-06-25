@@ -165,3 +165,4 @@ cython_debug/
 *vinbigdata-chest-xray-abnormalities-detection*
 datasets/vindr-cxr-original/test
 datasets/vindr-cxr-original/train
+*.zip
