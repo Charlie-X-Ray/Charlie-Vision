@@ -166,3 +166,7 @@ cython_debug/
 datasets/vindr-cxr-original/test
 datasets/vindr-cxr-original/train
 *.zip
+
+vision-docker/vision
+vision-docker/segmented/*.png
+segments/
