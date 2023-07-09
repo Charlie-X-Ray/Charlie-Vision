@@ -4,6 +4,34 @@ The AI behind Charlie X
 
 ## Setup
 
+### pip
+
+You will required python installed. There are multiple environment files,
+but for most cases it suffices to use `vision-docker/requirements.txt`.
+
+First create a virutal environment (we'll call ours vision) and activate it:
+
+```bash
+python3 -m venv vision
+source ./vision/bin/activate
+```
+
+You should see your prompt be prefixed with the name of the environment (vision).
+
+Next install all the required packages:
+
+```bash
+pip install -r vision-docker/requirements.txt
+```
+
+And that should be all.
+
+### conda
+
+conda is another way to manage environments. However many of their dependencies have problems so it might be difficult to use.
+
+The instructions below have worked so far.
+
 To start working on this repository, you will need to have miniconda/ anaconda installed,
 I recommend installing miniconda.
 
