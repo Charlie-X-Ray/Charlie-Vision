@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import cv2
 import math
+from google.cloud import storage
 
 DESTINATION_FOLDER = 'datasets'
 DATASET_FOLDER = join('datasets', 'vindr-cxr-original')
@@ -15,6 +16,13 @@ ANNOTATED_FOLDER = join(DESTINATION_FOLDER, 'annotated')
 PNG_FOLDER = join(DESTINATION_FOLDER, 'converted') # wear to save converted photos
 TRAIN_FILE = join(DATASET_FOLDER, 'train.csv')
 TRAIN_FOLDER = join(DATASET_FOLDER, 'train')
+PROJECT_ID = 'charlie-x-ray'
+BUCKET_NAME = 'charlie-x-ray.appspot.com'
+ORIGINAL_PREFIX = 'original/'
+LEARN_PREFIX = 'learn/'
+BROWSE_PREFIX = 'browse/'
+STORAGE_CLIENT = storage.Client(project=PROJECT_ID)
+BUCKET = STORAGE_CLIENT.get_bucket(BUCKET_NAME)
 
 
 def read_xray(path, voi_lut=True, fix_monochrome=True):
@@ -136,10 +144,10 @@ def retrieve_dicom_data(num: int, train_file: str):
 def main():
     assert os.path.exists(DATASET_FOLDER)
 
-    number_of_images = 8
+    number_of_images = 100 
 
     dicom_datas = retrieve_dicom_data(number_of_images, TRAIN_FILE)
-    for dicom_datum in dicom_datas:
+    for i, dicom_datum in enumerate(dicom_datas):
 
         image_id = dicom_datum['image_id']
         
@@ -148,16 +156,49 @@ def main():
         img_og = read_xray(dicom_path)
 
         # Saves the xray as a png
-        cv2.imwrite(join(PNG_FOLDER, image_id + '.png'), img_og)
+        annotated_path = join(ANNOTATED_FOLDER, image_id + '.png')
+        png_path = join(PNG_FOLDER, image_id + '.png')
+        cv2.imwrite(annotated_path, img_og)
+        cv2.imwrite(png_path, resize(img_og, 512))
 
         # Reads the saved png files
-        img_saved = cv2.imread(join(PNG_FOLDER, image_id + '.png'))
+        img_saved = cv2.imread(annotated_path)
         print(f'Drawing boxes for {image_id}')
         img = draw_boxes(img_saved, dicom_datum['coords'])
         img = resize(img, 512)
 
         # Saves the images with boxes
-        cv2.imwrite(join(ANNOTATED_FOLDER, image_id + '_box.png'), img)
+        cv2.imwrite(annotated_path, img)
+        upload_xray(png_path, annotated_path,
+                    dicom_datum['coords'][0]['class_name'],
+                    for_browse = (i % 2 == 0) )
+        
+
+def upload_xray(xray_path, annotated_path, condition, for_browse = True):
+    filename = os.path.basename(xray_path)
+    # print("Buckets:")
+    # for bucket in buckets:
+    #     print(bucket.name)
+    # print("Listed all storage buckets.")
+
+    original_blob = BUCKET.blob(ORIGINAL_PREFIX + filename)
+    target_blob = BUCKET.blob((BROWSE_PREFIX if for_browse else LEARN_PREFIX) + filename)
+
+    metadata = {'condition': condition}
+
+    original_blob.upload_from_filename(xray_path)
+    target_blob.upload_from_filename(annotated_path)
+
+    original_blob = BUCKET.get_blob(ORIGINAL_PREFIX + filename)
+    target_blob = BUCKET.get_blob((BROWSE_PREFIX if for_browse else LEARN_PREFIX) + filename)
+
+    original_blob.metadata = metadata
+    target_blob.metadata = metadata
+    
+    original_blob.patch()
+    target_blob.patch()
+
+
 
 
 
