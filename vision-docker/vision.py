@@ -13,6 +13,9 @@ import torchxrayvision as xrv
 dn = xrv.models.DenseNet(weights="all")
 
 def diagnose(img, model=dn):
+  img = img - np.min(img)
+  img = img / np.max(img)
+  img = (img * 255).astype(np.uint8)
   img  = xrv.datasets.normalize(img, 255)
   img = img[None, :, :]       
   transform = torchvision.transforms.Compose([xrv.datasets.XRayCenterCrop(),
@@ -27,6 +30,9 @@ def diagnose(img, model=dn):
 psp = xrv.baseline_models.chestx_det.PSPNet()
 
 def segment(img, model=psp):
+  img = img - np.min(img)
+  img = img / np.max(img)
+  img = (img * 255).astype(np.uint8)
   img = xrv.datasets.normalize(img, 255) # convert 8-bit image to [-1024, 1024] range
   img = img[None, ...] # Make single color channel
 

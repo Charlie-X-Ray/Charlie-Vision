@@ -36,7 +36,7 @@ async def diagnose_xray(file: UploadFile):
   file_name = str(file.filename)
   file_bytes = BytesIO(file_content)
 
-  img = skimage.io.imread(file_bytes)
+  img = skimage.io.imread(file_bytes, as_gray=True)
   return {
     'conditions': vision.diagnose(img),
     }
@@ -48,5 +48,5 @@ async def heart(file: UploadFile):
   file_name = str(file.filename)
   file_bytes = BytesIO(file_content)
 
-  img = skimage.io.imread(file_bytes)
+  img = skimage.io.imread(file_bytes, as_gray=True)
   return FileResponse(vision.segment(img))
